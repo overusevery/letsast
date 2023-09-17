@@ -16,15 +16,38 @@ func main() {
 		os.Exit(1)
 	}
 
-	listFuncName(node)
+	listFunc(node)
+	//for debug
 	//ast.Print(fset, node)
 }
 
-func listFuncName(node *ast.File) {
+func listFunc(node *ast.File) {
 	ast.Inspect(node, func(n ast.Node) bool {
 		value, ok := n.(*ast.FuncDecl)
 		if ok {
 			fmt.Printf("Name:%v\n", value.Name.Name)
+			for _, param := range value.Type.Params.List {
+				switch paramType := param.Type.(type) {
+				case *ast.Ident:
+					for _, variable := range param.Names {
+						fmt.Printf(" - input:%v(%v)\n", variable.Name, paramType)
+					}
+				case *ast.Ellipsis:
+					//example: (int...)
+					for _, variable := range param.Names {
+						ident, _ := paramType.Elt.(*ast.Ident)
+						fmt.Printf(" - input:%v(%v...)\n", variable.Name, ident.Name)
+					}
+				default:
+					panic("not implemnted for this type")
+				}
+
+			}
+			if value.Type.Results != nil {
+				for _, output := range value.Type.Results.List {
+					fmt.Printf(" - output:(%v)\n", output.Type)
+				}
+			}
 		}
 		return true
 	})
