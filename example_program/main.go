@@ -4,6 +4,16 @@ import (
 	"fmt"
 )
 
+type Price struct {
+	value    int
+	currency string
+}
+type Product struct {
+	name     string
+	price    Price
+	isOnSell bool
+}
+
 func add(a int, b int) int {
 	return a + b
 }

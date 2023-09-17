@@ -15,12 +15,16 @@ func main() {
 		fmt.Println("parse error:", err)
 		os.Exit(1)
 	}
-
-	//listFunc(node, listFuncOption{printInOutArgument: false})
-	listFunc(node, listFuncOption{printInOutArgument: true})
-
 	//for debug
 	//ast.Print(fset, node)
+
+	//listFunc(node, listFuncOption{printInOutArgument: false})
+	fmt.Println("function")
+	listFunc(node, listFuncOption{printInOutArgument: true})
+
+	fmt.Println("struct")
+	listStruct(node)
+
 }
 
 type listFuncOption struct {
@@ -54,6 +58,29 @@ func listFunc(node *ast.File, opt listFuncOption) {
 					for _, output := range value.Type.Results.List {
 						fmt.Printf(" - output:(%v)\n", output.Type)
 					}
+				}
+			}
+		}
+		return true
+	})
+
+}
+
+func listStruct(node *ast.File) {
+	ast.Inspect(node, func(n ast.Node) bool {
+		if value, ok := n.(*ast.GenDecl); ok && value.Tok == token.TYPE {
+			for _, spec := range value.Specs {
+				tspec, _ := spec.(*ast.TypeSpec)
+				fmt.Printf("Name:%v\n", tspec.Name.Name)
+				stype, _ := tspec.Type.(*ast.StructType)
+				for _, field := range stype.Fields.List {
+					switch fieldType := field.Type.(type) {
+					case *ast.Ident:
+						fmt.Printf("- filed:%v(%v)\n", field.Names[0].Name, fieldType.Name)
+					default:
+						panic("not implemnted for this type")
+					}
+
 				}
 			}
 		}
